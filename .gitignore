@@ -24,6 +24,6 @@ dist-ssr
 *.sw?
 *.sh
 
-fcp-argocd/*
+./fcp-argocd/
 
 .env
