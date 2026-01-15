@@ -29,7 +29,8 @@ const Login = () => {
     try {
       await login({email,password})
     } catch (error) {
-      
+      console.error("Login error:", error)
+      toast.error(error.response?.data?.message || "Login failed")
     }
   }
 

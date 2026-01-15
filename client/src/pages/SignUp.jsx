@@ -13,6 +13,7 @@ const SignUp = () => {
       await signUp({username,email,password})
     } catch (error) {
       console.log(error)
+      alert(error.response?.data?.message || "Sign Up failed")
     }
   }
   const [showPassword, setShowPassword] = useState(false);
