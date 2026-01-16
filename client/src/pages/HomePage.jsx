@@ -13,7 +13,7 @@ const HomePage = () => {
       ) : (
         <div className="flex-1 flex items-center justify-center">
           <div className="p-4 space-y-4">
-            <h1 className="text-3xl font-bold">Welcome to ChatUp</h1>
+            <h1 className="text-3xl font-bold">Welcome to ChatUp - Testing Automation using ArgoCd</h1>
             <p>
               <span role="img" aria-label="speech bubble">
                 {" "}
