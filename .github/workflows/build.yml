@@ -26,20 +26,25 @@ jobs:
     runs-on: self-hosted
     steps:
     - name: Update GitOps repo
+      env:
+        GH_TOKEN: ${{ secrets.GITOPS_TOKEN }}
       run: |
-        git clone https://github.com/avinash7r/fca-argocd.git
-        cd fca-argocd
+        # 1. Use an empty directory to avoid conflicts with previous runs
+        git clone https://x-access-token:${GH_TOKEN}@github.com/avinash7r/fca-argocd.git repo
+        cd repo
 
-        git remote set-url origin https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/avinash7r/fca-argocd.git
-
+        # 2. Apply changes
         sed -i "s|fca-server:.*|fca-server:${{ github.run_number }}|" k8s/server-deployment.yaml
         sed -i "s|fca-client:.*|fca-client:${{ github.run_number }}|" k8s/client-deployment.yaml
 
-        if git diff --quiet; then
+        # 3. Check for changes and push
+        if [ -z "$(git status --porcelain)" ]; then
           echo "No changes to commit"
         else
           git config user.email "ci@github.com"
           git config user.name "github-actions"
-          git commit -am "Deploy ${{ github.run_number }}"
+          git add .
+          git commit -m "Deploy ${{ github.run_number }}"
+          # Use --quiet to avoid leaking info, but it will still show errors if it fails
           git push origin main
         fi
