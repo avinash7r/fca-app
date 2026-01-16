@@ -23,7 +23,7 @@ jobs:
 
       - name: Update GitOps repo
         run: |
-          git clone https://github.com/avinash7r/fca-argocd.git
+          git clone https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/avinash7r/fca-argocd.git
           cd fca-argocd
 
           sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server-deployment.yaml
