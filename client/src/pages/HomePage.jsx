@@ -18,8 +18,8 @@ const HomePage = () => {
               <span role="img" aria-label="speech bubble">
                 {" "}
               </span>{" "}
-              A full-stack chat application built with React, Node.js, and
-              MongoDB.
+              A full-stack chat application built with React, Node.js, Express and MongoDB.
+              For Deployment used Docker, Kubernetes, Nginx.
             </p>
             <p>
               <span role="img" aria-label="rocket">
