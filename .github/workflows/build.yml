@@ -26,8 +26,8 @@ jobs:
           git clone https://github.com/avinash7r/fca-argocd.git
           cd fca-argocd
 
-          sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server.yaml
-          sed -i "s/fca-client:.*/fca-client:${{ github.run_number }}/" k8s/client.yaml
+          sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server-deployment.yaml
+          sed -i "s/fca-client:.*/fca-client:${{ github.run_number }}/" k8s/client-deployment.yaml
 
           git config user.email "ci@github.com"
           git config user.name "github-actions"
