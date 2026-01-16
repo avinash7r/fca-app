@@ -20,20 +20,24 @@ jobs:
         run: |
           docker build -t localhost:5000/fca-client:${{ github.run_number }} ./client
           docker push localhost:5000/fca-client:${{ github.run_number }}
+    
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+    - name: Update GitOps repo
+      run: |
+        git clone https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/avinash7r/fca-argocd.git
+        cd fca-argocd
 
-      - name: Update GitOps repo
-        run: |
-          git clone https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/avinash7r/fca-argocd.git
-          cd fca-argocd
+        sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server-deployment.yaml
+        sed -i "s/fca-client:.*/fca-client:${{ github.run_number }}/" k8s/client-deployment.yaml
 
-          sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server-deployment.yaml
-          sed -i "s/fca-client:.*/fca-client:${{ github.run_number }}/" k8s/client-deployment.yaml
-
-          if git diff --quiet; then
-            echo "No changes to commit"
-          else
-            git config user.email "ci@github.com"
-            git config user.name "github-actions"
-            git commit -am "Deploy ${{ github.run_number }}"
-            git push
-          fi
+        if git diff --quiet; then
+          echo "No changes to commit"
+        else
+          git config user.email "ci@github.com"
+          git config user.name "github-actions"
+          git commit -am "Deploy ${{ github.run_number }}"
+          git push
+        fi

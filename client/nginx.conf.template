@@ -1,13 +1,11 @@
 server {
     listen 80;
 
-    # Serve static files
     root /usr/share/nginx/html;
     index index.html;
 
-    # Proxy API requests to the backend
     location /api/ {
-        proxy_pass http://fca-server-service:7777;
+        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -15,7 +13,6 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 
-    # Handle React Router paths
     location / {
         try_files $uri /index.html;
     }

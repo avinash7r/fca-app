@@ -1,6 +1,6 @@
 services:
   server:
-    image: localhost:5000/fca-server
+    image: localhost:5000/fca-server:1
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -10,7 +10,7 @@ services:
       - ./server/.env
 
   client:
-    image: localhost:5000/fca-client
+    image: localhost:5000/fca-client:1
     build:
       context: ./client
       dockerfile: Dockerfile
@@ -18,3 +18,5 @@ services:
       - "5173:80"
     depends_on:
       - server
+    env_file:
+      - ./client/.env
