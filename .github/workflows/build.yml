@@ -27,11 +27,13 @@ jobs:
     steps:
     - name: Update GitOps repo
       run: |
-        git clone https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/avinash7r/fca-argocd.git
+        git clone https://github.com/avinash7r/fca-argocd.git
         cd fca-argocd
 
-        sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server-deployment.yaml
-        sed -i "s/fca-client:.*/fca-client:${{ github.run_number }}/" k8s/client-deployment.yaml
+        git remote set-url origin https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/avinash7r/fca-argocd.git
+
+        sed -i "s|fca-server:.*|fca-server:${{ github.run_number }}|" k8s/server-deployment.yaml
+        sed -i "s|fca-client:.*|fca-client:${{ github.run_number }}|" k8s/client-deployment.yaml
 
         if git diff --quiet; then
           echo "No changes to commit"
@@ -39,5 +41,5 @@ jobs:
           git config user.email "ci@github.com"
           git config user.name "github-actions"
           git commit -am "Deploy ${{ github.run_number }}"
-          git push
+          git push origin main
         fi
