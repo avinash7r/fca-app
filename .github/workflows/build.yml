@@ -27,24 +27,8 @@ jobs:
     steps:
     - name: Update GitOps repo
       env:
-        GH_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+        # Pass secret to env to avoid exposure in logs/command history
+        GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
       run: |
-        # 1. Use an empty directory to avoid conflicts with previous runs
-        git clone https://x-access-token:${GH_TOKEN}@github.com/avinash7r/fca-argocd.git repo
-        cd repo
-
-        # 2. Apply changes
-        sed -i "s|fca-server:.*|fca-server:${{ github.run_number }}|" k8s/server-deployment.yaml
-        sed -i "s|fca-client:.*|fca-client:${{ github.run_number }}|" k8s/client-deployment.yaml
-
-        # 3. Check for changes and push
-        if [ -z "$(git status --porcelain)" ]; then
-          echo "No changes to commit"
-        else
-          git config user.email "ci@github.com"
-          git config user.name "github-actions"
-          git add .
-          git commit -m "Deploy ${{ github.run_number }}"
-          # Use --quiet to avoid leaking info, but it will still show errors if it fails
-          git push origin main
-        fi
+        # 1. Clone using the token explicitly to verify auth immediately
+        git clone https://oauth2:${GITOPS_TOKEN}@://
