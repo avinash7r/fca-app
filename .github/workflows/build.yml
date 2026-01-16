@@ -2,7 +2,7 @@ name: Build and Push FCA
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -29,7 +29,11 @@ jobs:
           sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server-deployment.yaml
           sed -i "s/fca-client:.*/fca-client:${{ github.run_number }}/" k8s/client-deployment.yaml
 
-          git config user.email "ci@github.com"
-          git config user.name "github-actions"
-          git commit -am "Deploy ${{ github.run_number }}"
-          git push
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git config user.email "ci@github.com"
+            git config user.name "github-actions"
+            git commit -am "Deploy ${{ github.run_number }}"
+            git push
+          fi
