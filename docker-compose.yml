@@ -13,7 +13,7 @@ services:
     image: localhost:5000/fca-client
     build:
       context: ./client
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     ports:
       - "5173:80"
     depends_on:
