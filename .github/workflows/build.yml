@@ -20,3 +20,16 @@ jobs:
         run: |
           docker build -t localhost:5000/fca-client:${{ github.run_number }} ./client
           docker push localhost:5000/fca-client:${{ github.run_number }}
+
+      - name: Update GitOps repo
+        run: |
+          git clone https://github.com/avinash7r/fca-argocd.git
+          cd fca-argocd
+
+          sed -i "s/fca-server:.*/fca-server:${{ github.run_number }}/" k8s/server.yaml
+          sed -i "s/fca-client:.*/fca-client:${{ github.run_number }}/" k8s/client.yaml
+
+          git config user.email "ci@github.com"
+          git config user.name "github-actions"
+          git commit -am "Deploy ${{ github.run_number }}"
+          git push

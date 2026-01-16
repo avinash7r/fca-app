@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+fcp-argocd
 
 # Editor directories and files
 .vscode/*
@@ -24,6 +25,6 @@ dist-ssr
 *.sw?
 *.sh
 
-./fcp-argocd/
+fcp-argocd
 
 .env
