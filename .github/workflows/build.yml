@@ -30,7 +30,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITOPS }}
       run: |
         # 1. Use an empty directory to avoid conflicts with previous runs
-        git clone https://x-access-token:${{GH_TOKEN}}@github.com/avinash7r/fca-argocd.git repo
+        git clone https://x-access-token:${GH_TOKEN}@github.com/avinash7r/fca-argocd.git repo
         cd repo
 
         # 2. Apply changes
