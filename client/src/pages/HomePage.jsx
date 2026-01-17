@@ -19,7 +19,7 @@ const HomePage = () => {
                 {" "}
               </span>{" "}
               A full-stack chat application built with React, Node.js, Express and MongoDB.
-              For Deployment used Docker, Kubernetes, Nginx.
+              chaged for testing automation using ArgoCd
             </p>
             <p>
               <span role="img" aria-label="rocket">
