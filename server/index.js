@@ -26,6 +26,10 @@ app.use(cors({
     credentials: true,
 }));
 
+app.use('/health', (req, res) => {
+    res.status(200).send('Server is healthy');
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 
