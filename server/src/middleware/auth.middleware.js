@@ -9,6 +9,7 @@ export const authMiddleware = async (req, res, next) => {
     if (!decoded) return res.status(401).json({ message: "Unauthorized" });
     const user = await User.findById(decoded.userID).select("-password");
     req.user = user;
+    // console.log("Authenticated user:", user);
     next();
   } catch (error) {
     console.log(`Error: ${error.message}`);
