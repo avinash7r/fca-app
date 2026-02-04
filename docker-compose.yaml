@@ -11,7 +11,7 @@ services:
       - fca-network
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:7777/health || exit 1"]
-      interval: 30s
+      interval: 5s
       timeout: 10s
       retries: 5
 
@@ -24,12 +24,8 @@ services:
       - BACKEND_PORT=7777
     networks:
       - fca-network
-    depends_on:
-      server:
-        condition: service_healthy
     
 
 networks:
   fca-network:
     driver: bridge
-    internal: true
