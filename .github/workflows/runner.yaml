@@ -10,7 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -25,8 +24,16 @@ jobs:
       - name: check images
         run: |
           docker images
-
-
+      - name: tag images
+        run: |
+          docker tag fca-app-server ${{ secrets.DOCKER_USERNAME }}/fca-server:${{ github.sha }}
+          docker tag fca-app-client ${{ secrets.DOCKER_USERNAME }}/fca-client:${{ github.sha }}
+      - name: push images
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/fca-server:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/fca-client:${{ github.sha }}
+        
+        
 
     #   - name: Build and Push Docker Images
     #     uses: docker/build-push-action@v4
