@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - 'learning/*'
   workflow_dispatch:
 
 jobs:
