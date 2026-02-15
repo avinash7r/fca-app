@@ -59,8 +59,6 @@ const gracefulShutdown = async (signal) => {
 process.on("SIGTERM", gracefulShutdown);
 process.on("SIGINT", gracefulShutdown);
 
-
-
 // app.use((req, res, next) => {
 //     const host = req.headers.host;
 //     if (host && host.includes('onrender.com')) {
@@ -106,6 +104,7 @@ app.use("/api/message", messageRoutes);
 //         res.sendFile(path.join(__dirname, "../client", "dist", "index.html"));
 //     });
 // }
+// testing docker build on files changes github actions
 const PORT = process.env.PORT;
 
 server.listen(PORT, "0.0.0.0", () => {
