@@ -41,7 +41,7 @@ jobs:
         if: needs.detect-changes.outputs.server == 'true'
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./
           file: ./server/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/fca-server:${{ github.sha }}
@@ -49,7 +49,7 @@ jobs:
         if: needs.detect-changes.outputs.client == 'true'
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./client
           file: ./client/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/fca-client:${{ github.sha }}
