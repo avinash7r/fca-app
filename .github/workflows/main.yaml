@@ -17,9 +17,9 @@ jobs:
         uses: actions/checkout@v4
       - name: detect changes
         id: changes
-        uses: tj-actions/changed-files@v34
+        uses: tj-actions/changed-files@v46.0.1 # Upgraded for security/features
         with:
-          files: |
+          files_yaml: |
             server:
               - 'server/**'
             client:
