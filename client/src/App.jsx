@@ -41,7 +41,6 @@ function App() {
       <Route path="/Setting" element={<Setting />} />
     </Routes>
     <Toaster />
-
     </>
   )
 }
