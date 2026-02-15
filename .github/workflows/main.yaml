@@ -33,6 +33,7 @@ jobs:
         run: |
           echo "Server changes: ${{ needs.detect-changes.outputs.server }}"
           echo "Client changes: ${{ needs.detect-changes.outputs.client }}"
+          echo "Changed files"
 
   build-push:
     runs-on: ubuntu-latest
