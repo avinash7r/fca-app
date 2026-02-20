@@ -70,10 +70,16 @@ process.on("SIGINT", gracefulShutdown);
 
 app.use(express.json());
 app.use(cookieParser());
-// app.use(cors({
-//     origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-//     credentials: true,
-// }));
+if (process.env.NODE_ENV === "dev") {
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+      credentials: true,
+    }),
+  );
+}
+
+
 
 app.use((req, res, next) => {
   // console.log({
@@ -91,7 +97,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/health", (req, res) => {
+app.use("/api/health", (req, res) => {
   res.status(200).send("Server is healthy");
 });
 
