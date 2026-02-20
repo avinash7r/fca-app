@@ -1,0 +1,23 @@
+git clone https://github.com/avinash7r/kodekloud-terraform-learning.git
+
+
+
+scp -r -i ssh/k8s k8s ubuntu@54.243.20.49:/home/ubuntu/
+
+ssh -i ssh/k8s ubuntu@54.243.20.49
+
+alias k=kubectl
+
+
+
+i have learnt nginx and dns race how to tackle it using :
+
+# 👇 force runtime DNS resolution
+set $backend http://${BACKEND_HOST}:${BACKEND_PORT};
+
+proxy_pass $backend;
+
+# optional but recommended
+proxy_connect_timeout 5s;
+proxy_read_timeout 30s;
+proxy_next_upstream error timeout http_502 http_503 http_504;
