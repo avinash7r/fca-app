@@ -5,6 +5,12 @@ import { connectDB, disconnectDB } from "./src/lib/connectDB.js";
 import { router as authRoutes } from "./src/routes/auth.routes.js";
 import { router as messageRoutes } from "./src/routes/message.routes.js";
 import { app, io, server } from "./src/lib/socket.js";
+import {
+  httpRequestCounter_middleware,
+  httpRequestDuration_middleware,
+} from "./src/middleware/httpRequestCounter.middleware.js";
+
+import { metrics } from "./src/lib/prom-client.js";
 import cors from "cors";
 import path from "path";
 import exp from "constants";
@@ -79,30 +85,38 @@ if (process.env.NODE_ENV === "dev") {
   );
 }
 
-
-
-app.use((req, res, next) => {
-  // console.log({
-  //   method: req.method,
-  //   url: req.originalUrl,
-  //   body: req.body,
-  //   headers: req.headers["content-type"],
-  // });
-  activeRequests++;
-  console.log(`Active Requests: ${activeRequests}`);
-  res.on("finish", () => {
-    activeRequests--;
-    console.log(`Active Requests Decremented: ${activeRequests}`);
-  });
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log({
+//     method: req.method,
+//     url: req.originalUrl,
+//     body: req.body,
+//     headers: req.headers["content-type"],
+//   });
+//   activeRequests++;
+//   console.log(`Active Requests: ${activeRequests}`);
+//   res.on("finish", () => {
+//     activeRequests--;
+//     console.log(`Active Requests Decremented: ${activeRequests}`);
+//   });
+//   next();
+// });
 
 app.use("/api/health", (req, res) => {
   res.status(200).send("Server is healthy");
 });
-
-app.use("/api/auth", authRoutes);
-app.use("/api/message", messageRoutes);
+app.use("/api/metrics", metrics);
+app.use(
+  "/api/auth",
+  httpRequestCounter_middleware,
+  httpRequestDuration_middleware,
+  authRoutes,
+);
+app.use(
+  "/api/message",
+  httpRequestCounter_middleware,
+  httpRequestDuration_middleware,
+  messageRoutes,
+);
 
 // if (process.env.NODE_ENV === 'production') {
 //     app.use(express.static(path.join(__dirname, "../client/dist")));
