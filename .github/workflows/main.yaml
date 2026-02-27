@@ -6,6 +6,10 @@ on:
       - "learning/*"
   workflow_dispatch:
 
+env:
+  CLIENT_IMAGE: ${{ secrets.DOCKER_USERNAME }}/fca-client:${{ github.sha }}
+  SERVER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/fca-server:${{ github.sha }}
+
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
@@ -64,3 +68,39 @@ jobs:
           file: ./client/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/fca-client:${{ github.sha }}
+    
+  update-k8s:
+    runs-on: ubuntu-latest
+    needs: [build-push, detect-changes]
+    steps:
+      - name: Checkout k8s repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.K8S_REPO }}
+          token: ${{ secrets.GITOPS_TOKEN }}
+          path: k8s-repo
+
+      - name: install Kustomize
+        run: |
+          curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
+          sudo mv kustomize /usr/local/bin
+      
+      - name: update server image in k8s config
+        if: needs.detect-changes.outputs.server == 'true'
+        run: |
+          cd k8s-repo/k8s/manifests
+          kustomize edit set image server-image=${{ secrets.DOCKER_USERNAME }}/fca-server:${{ github.sha }}
+      
+      - name: update client image in k8s config
+        if: needs.detect-changes.outputs.client == 'true'
+        run: |
+          cd k8s-repo/k8s/manifests
+          kustomize edit set image client-image=${{ secrets.DOCKER_USERNAME }}/fca-client:${{ github.sha }}
+      - name: commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          cd k8s-repo
+          git add .
+          git commit -m "Update k8s images to ${{ github.sha }}" || echo "No changes to commit"
+          git push origin HEAD:main
