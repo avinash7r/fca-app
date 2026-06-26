@@ -26,6 +26,14 @@ jobs:
             - name: Login to AWS-ECR
               id: login-ecr
               uses: aws-actions/amazon-ecr-login@v2
+            
+            - name: Debug ECR variables
+              run: |
+                echo "CLIENT_ECR_REGISTRY=$CLIENT_ECR_REGISTRY"
+                echo "CLIENT_ECR_REPOSITORY=$CLIENT_ECR_REPOSITORY"
+              env:
+                CLIENT_ECR_REGISTRY: ${{ secrets.CLIENT_ECR_REGISTRY }}
+                CLIENT_ECR_REPOSITORY: ${{ secrets.CLIENT_ECR_REPOSITORY }}
 
             - name: Build, Tag, and Push Image to ECR
               env:
