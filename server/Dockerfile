@@ -2,12 +2,12 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY server/package*.json ./server/
-RUN cd server && npm install --omit=dev
+COPY package*.json ./
 
-COPY server ./server
+RUN npm install
 
-WORKDIR /app/server
+COPY . .
 
 EXPOSE 7777
-CMD ["node", "index.js"]
+
+CMD ["npm", "start"]

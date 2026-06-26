@@ -1,21 +1,22 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import logger from "./logger.js";
 dotenv.config();
 
 export const connectDB = async () =>{
     try {
         const conn=await mongoose.connect(process.env.MONGO_URI);
-        console.log(`MongoDB connected: ${conn.connection.host}`);
+        logger.info({ host: conn.connection.host }, "MongoDB connected");
     } catch (error) {
-        console.error(`Error: ${error.message}`);
+        logger.error({ err: error }, "MongoDB connection failed");
     }
 }
 
 export const disconnectDB = async () =>{
     try {
         await mongoose.connection.close();
-        console.log("MongoDB disconnected");
+        logger.info("MongoDB disconnected");
     } catch (error) {
-        console.error(`Error: ${error.message}`);
+        logger.error({ err: error }, "MongoDB disconnect failed");
     }
 }

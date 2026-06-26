@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - "learning/*"
   workflow_dispatch:
 
 env:
@@ -19,8 +18,6 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: detect changes
         id: changes
@@ -88,13 +85,13 @@ jobs:
       - name: update server image in k8s config
         if: needs.detect-changes.outputs.server == 'true'
         run: |
-          cd k8s-repo/k8s/manifests
+          cd k8s-repo/k8s/overlays/dev
           kustomize edit set image server-image=${{ secrets.DOCKER_USERNAME }}/fca-server:${{ github.sha }}
       
       - name: update client image in k8s config
         if: needs.detect-changes.outputs.client == 'true'
         run: |
-          cd k8s-repo/k8s/manifests
+          cd k8s-repo/k8s/overlays/dev
           kustomize edit set image client-image=${{ secrets.DOCKER_USERNAME }}/fca-client:${{ github.sha }}
       - name: commit and push changes
         run: |

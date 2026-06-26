@@ -1,19 +1,22 @@
 name: fca-app
 
 services:
-  server:
+  backend-service:
     build: ./server
     expose:
       - "7777"
+    ports:
+      - "5001:7777"
     env_file:
       - ./server/.env
-    networks:
-      - fca-network
+    volumes:
+      - ./server:/app
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:7777/health || exit 1"]
+      test:
+        ["CMD-SHELL", "wget -qO- http://127.0.0.1:5001/api/health || exit 1"]
       interval: 5s
       timeout: 10s
-      retries: 5
+      retries: 5a
 
   client:
     build: ./client
@@ -22,10 +25,5 @@ services:
     environment:
       - BACKEND_HOST=server
       - BACKEND_PORT=7777
-    networks:
-      - fca-network
-    
 
-networks:
-  fca-network:
-    driver: bridge
+

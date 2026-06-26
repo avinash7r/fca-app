@@ -1,16 +1,15 @@
 import client from "prom-client";
-
+import express from "express";
 const register = new client.Registry();
+const metrics = express();
 
 client.collectDefaultMetrics({ register });
 
-// Collect default Node.js metrics
 client.collectDefaultMetrics({
   register,
   prefix: "node_",
 });
 
-// Optional: custom metric example
 export const httpRequestCounter = new client.Counter({
   name: "http_requests_total",
   help: "Total number of HTTP requests",
@@ -27,7 +26,26 @@ export const httpRequestDuration = new client.Histogram({
 register.registerMetric(httpRequestCounter);
 register.registerMetric(httpRequestDuration);
 
-export const metrics = async (req, res) => {
+metrics.use((req, res, next) => {
+  const end = httpRequestDuration.startTimer({
+    method: req.method,
+    route: req.path,
+  });
+  res.on("finish", () => {
+    end({ status: res.statusCode });
+    httpRequestCounter.inc({
+      method: req.method,
+      route: req.path,
+      status: res.statusCode,
+    });
+  });
+  next();
+});
+
+metrics.get("/", async (req, res) => {
   res.set("Content-Type", register.contentType);
   res.end(await register.metrics());
-};
+});
+
+export { metrics };
+

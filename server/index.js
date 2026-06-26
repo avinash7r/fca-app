@@ -9,15 +9,12 @@ import {
   httpRequestCounter_middleware,
   httpRequestDuration_middleware,
 } from "./src/middleware/httpRequestCounter.middleware.js";
-
-// testing docker build on files changes github actions
-// updated repo link
-// updated github actions
+import { requestLogger } from "./src/middleware/requestLogger.middleware.js";
 
 import { metrics } from "./src/lib/prom-client.js";
+import logger from "./src/lib/logger.js";
 import cors from "cors";
 import path from "path";
-import exp from "constants";
 const __dirname = path.resolve();
 dotenv.config();
 
@@ -28,18 +25,18 @@ const gracefulShutdown = async (signal) => {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
-  console.log(`Received ${signal}. Starting graceful shutdown...`);
+  logger.info({ signal }, "Graceful shutdown started");
 
   // 1. Stop accepting new connections
   server.close(() => {
-    console.log("HTTP server closed");
+    logger.info("HTTP server closed");
   });
 
   // 2. Force shutdown if it takes too long
   const FORCE_EXIT_TIMEOUT = 10000; // 10 seconds
 
   const forceExit = setTimeout(() => {
-    console.error("Shutdown timed out. Forcing exit.");
+    logger.error("Shutdown timed out, forcing exit");
     process.exit(1);
   }, FORCE_EXIT_TIMEOUT);
 
@@ -55,11 +52,11 @@ const gracefulShutdown = async (signal) => {
     });
 
   await waitForRequests();
-  console.log("All requests finished");
+  logger.info("All in-flight requests finished");
 
   // 4. Close DB connection
   await disconnectDB();
-  console.log("MongoDB connection closed");
+  logger.info("MongoDB connection closed");
 
   clearTimeout(forceExit);
   process.exit(0);
@@ -105,6 +102,8 @@ if (process.env.NODE_ENV === "dev") {
 //   next();
 // });
 
+app.use(requestLogger);
+
 app.use("/api/health", (req, res) => {
   res.status(200).send("Server is healthy");
 });
@@ -132,6 +131,6 @@ app.use(
 const PORT = process.env.PORT;
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on port ${PORT}`);
+  logger.info({ port: PORT }, "Server started");
   connectDB();
 });

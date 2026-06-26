@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { createToken } from "../lib/util.js";
 import cloudinary from "../lib/cloudinary.js";
+import logger from "../lib/logger.js";
 
 export const registerUser = async (req, res) => {
     try {
@@ -33,12 +34,12 @@ export const registerUser = async (req, res) => {
                 }
             });
         } catch (error) {
-            console.error("Error saving new user:", error);
+            logger.error({ err: error }, "Error saving new user");
             return res.status(500).json({ message: "Error creating user" });
         }
 
     } catch (error) {
-        console.error(`Error: ${error.message}`);
+        logger.error({ err: error }, "Error in registerUser");
     }
 }
 
@@ -64,7 +65,7 @@ export const loginUser = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(`Error: ${error.message}`);
+        logger.error({ err: error }, "Error in loginUser");
     }
 };
 
@@ -78,7 +79,7 @@ export const logoutUser = async (req, res) => {
         });
         return res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
-        console.error(`Error: ${error.message}`);
+        logger.error({ err: error }, "Error in logoutUser");
     }
 };
 
@@ -92,9 +93,8 @@ export const updateUser = async (req, res) => {
         const user=await User.findByIdAndUpdate(req.user._id,{profilePic:cloudinaryResponse.secure_url},{new:true});
         return res.status(200).json(user);
     } catch (error) {
-        console.log(`Error: ${error.message}`);
+        logger.error({ err: error }, "Error in updateUser");
         res.status(500).json({ message: "Server error updating Profile" });
-        
     }
 };
 
@@ -102,7 +102,7 @@ export const checkAuth = async (req, res) => {
     try {
         res.status(200).json({ user: req.user });
     } catch (error) {
-        console.log(`Error: ${error.message}`);
+        logger.error({ err: error }, "Error in checkAuth");
         res.status(500).json({ message: "Server error checking authentication" });
     }
 };

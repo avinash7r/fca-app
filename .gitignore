@@ -6,6 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*/.terraform*
+*/terraform.tfstate
 
 node_modules
 dist
@@ -29,3 +31,6 @@ fcp-argocd
 
 .env
 k8s
+
+*/.terraform*
+*/terraform.tfstate*

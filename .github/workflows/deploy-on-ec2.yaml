@@ -1,0 +1,48 @@
+name: deploy-on-ec2
+on:
+    push:
+        branches:
+            - infra
+    workflow_dispatch:
+
+permissions:
+    id-token: write
+    contents: read
+
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout repository
+              uses: actions/checkout@v4
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+                aws-region: ${{ secrets.AWS_REGION }}
+            
+            - name: Login to AWS-ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Build, Tag, and Push Image to ECR
+              env:
+                CLIENT_ECR_REGISTRY: ${{ secrets.CLIENT_ECR_REGISTRY }}
+                CLIENT_ECR_REPOSITORY: ${{ secrets.CLIENT_ECR_REPOSITORY }}
+                SERVER_ECR_REGISTRY: ${{ secrets.SERVER_ECR_REGISTRY }}
+                SERVER_ECR_REPOSITORY: ${{ secrets.SERVER_ECR_REPOSITORY }}
+                IMAGE_TAG: ${{ github.sha }}
+              run: |
+                cd client
+                docker build -t $CLIENT_ECR_REGISTRY/$CLIENT_ECR_REPOSITORY:$IMAGE_TAG .
+                docker tag $CLIENT_ECR_REGISTRY/$CLIENT_ECR_REPOSITORY:$IMAGE_TAG $CLIENT_ECR_REGISTRY/$CLIENT_ECR_REPOSITORY:latest
+                docker push $CLIENT_ECR_REGISTRY/$CLIENT_ECR_REPOSITORY:$IMAGE_TAG
+                docker push $CLIENT_ECR_REGISTRY/$CLIENT_ECR_REPOSITORY:latest
+
+                cd ../server
+                docker build -t $SERVER_ECR_REGISTRY/$SERVER_ECR_REPOSITORY:$IMAGE_TAG .
+                docker tag $SERVER_ECR_REGISTRY/$SERVER_ECR_REPOSITORY:$IMAGE_TAG $SERVER_ECR_REGISTRY/$SERVER_ECR_REPOSITORY:latest
+                docker push $SERVER_ECR_REGISTRY/$SERVER_ECR_REPOSITORY:$IMAGE_TAG
+                docker push $SERVER_ECR_REGISTRY/$SERVER_ECR_REPOSITORY:latest

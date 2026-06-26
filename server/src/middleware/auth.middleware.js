@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
+import logger from "../lib/logger.js";
 
 export const authMiddleware = async (req, res, next) => {
   try {
@@ -12,6 +13,6 @@ export const authMiddleware = async (req, res, next) => {
     // console.log("Authenticated user:", user);
     next();
   } catch (error) {
-    console.log(`Error: ${error.message}`);
+    logger.error({ err: error }, "Auth middleware error");
   }
 };
