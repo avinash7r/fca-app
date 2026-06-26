@@ -44,3 +44,39 @@ jobs:
                 docker tag $SERVER_ECR_URL:$IMAGE_TAG $SERVER_ECR_URL:latest
                 docker push $SERVER_ECR_URL:$IMAGE_TAG
                 docker push $SERVER_ECR_URL:latest
+
+
+            - name: Deploy to EC2 via AWS SSM
+              env:
+                SERVER_INSTANCE_ID: ${{ secrets.SERVER_EC2_INSTANCE_ID }}
+                CLIENT_INSTANCE_ID: ${{ secrets.CLIENT_EC2_INSTANCE_ID }}
+                CLIENT_ECR_URL: ${{ secrets.CLIENT_ECR_URL }}
+                SERVER_ECR_URL: ${{ secrets.SERVER_ECR_URL }}
+                IMAGE_TAG: ${{ github.sha }}
+                AWS_REGION: ${{ secrets.AWS_REGION }}
+              run: |
+                aws ssm send-command \
+                  --region $AWS_REGION \
+                  --instance-ids $CLIENT_INSTANCE_ID \
+                  --document-name "AWS-RunShellScript" \
+                  --parameters commands="[
+                    \"aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $CLIENT_ECR_URL\",
+                    \"docker pull $CLIENT_ECR_URL:$IMAGE_TAG\",
+                    \"docker stop client || true\",
+                    \"docker rm client || true\",
+                    \"docker run -d --name client -p 80:80 -e BACKEND_URL=${{ secrets.SERVER_PRIVATE_IP }}:7777 $CLIENT_ECR_URL:$IMAGE_TAG\"
+                  ]" \
+                  --comment "Deploy client $IMAGE_TAG"
+
+                aws ssm send-command \
+                  --region $AWS_REGION \
+                  --instance-ids $SERVER_INSTANCE_ID \
+                  --document-name "AWS-RunShellScript" \
+                  --parameters commands="[
+                    \"aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $SERVER_ECR_URL\",
+                    \"docker pull $SERVER_ECR_URL:$IMAGE_TAG\",
+                    \"docker stop server || true\",
+                    \"docker rm server || true\",
+                    \"docker run -d --name server -p 5001:7777 -e MONGO_URI=${{ secrets.MONGO_URI }} -e JWT_SECRET=${{ secrets.JWT_SECRET }} -e CORS_ORIGIN=${{ secrets.CORS_ORIGIN }} -e NODE_ENV=production $SERVER_ECR_URL:$IMAGE_TAG\"
+                  ]" \
+                  --comment "Deploy server $IMAGE_TAG"
